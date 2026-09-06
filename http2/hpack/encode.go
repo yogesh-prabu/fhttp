@@ -133,6 +133,9 @@ func (e *Encoder) SetMaxDynamicTableSizeLimit(v uint32) {
 
 // shouldIndex reports whether f should be indexed.
 func (e *Encoder) shouldIndex(f HeaderField) bool {
+	if f.Name == ":path" {
+		return false
+	}
 	return !f.Sensitive && f.Size() <= e.dynTab.maxSize
 }
 

@@ -384,3 +384,30 @@ func BenchmarkEncoderSearchTable(b *testing.B) {
 		}
 	}
 }
+
+func TestPathWithoutIndexing(t *testing.T) {
+	var buf bytes.Buffer
+	e := NewEncoder(&buf)
+
+	// :path with a non-root value should be encoded as Literal Without Indexing (0x04)
+	err := e.WriteField(HeaderField{Name: ":path", Value: "/test"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	encoded := buf.Bytes()
+	if len(encoded) == 0 {
+		t.Fatal("empty encoded bytes")
+	}
+
+	// Byte 0 must be 0x04 (0000 0100: '0000' = without indexing, index 4 = :path in static table)
+	if encoded[0] != 0x04 {
+		t.Fatalf("got first byte 0x%02x, want 0x04 (literal without indexing, index 4)", encoded[0])
+	}
+
+	// Dynamic table must remain empty
+	if e.dynTab.table.len() != 0 {
+		t.Errorf("expected dynamic table to be empty, got %d entries", e.dynTab.table.len())
+	}
+}
+

@@ -197,6 +197,9 @@ func newStaticTable() *headerFieldTable {
 	for _, e := range staticTableEntries[:] {
 		t.addEntry(e)
 	}
+	// For Chrome compatibility, the static name index for :path must be 4 (:path: /)
+	// rather than 5 (:path: /index.html).
+	t.byName[":path"] = 4
 	return t
 }
 
